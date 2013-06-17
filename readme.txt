@@ -6,4 +6,4 @@ Simply include the two package below on your host HTML pages in the order they a
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.js"></script>
 <script src="http://s3.amazonaws.com/hots3sysbucketriot/hotriot_ajax_min.js"></script>
 
-HotRiot is dependent on jQuery (version 7 or later). In the script code above, we're loading jQuery from the Google repository. Your free to load them however you think best.
+HotRiot is dependent on jQuery (version 7 or later). In the script code above, we're loading jQuery from the Google repository. Your free to load it however you think best.
