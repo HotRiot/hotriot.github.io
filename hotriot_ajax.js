@@ -1531,7 +1531,7 @@ HotRiot.postForm = function( formID, requestPreProcessing, requestSuccessProcess
     bindOptions.error = requestErrorProcessing;
     bindOptions.type = 'post';
     bindOptions.url = HotRiot.fullyQualifiedHRURL;
-    bindOptions.xhrFields['withCredentials'] = true;
+    bindOptions.xhrFields['withCredentials'] = 'true';
 
 
     $('#' + formID).ajaxSubmit( bindOptions );
