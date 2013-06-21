@@ -1546,6 +1546,7 @@ alert( "3");
 // This is a convenience function for saving a record to your databases which simply forwards processing to the HotRiot.postForm function.
 HotRiot.postRecord = function( formID, requestSuccessProcessing, requestErrorProcessing )
 {
+alert( "this");
     return HotRiot.postForm( formID, null, requestSuccessProcessing, requestErrorProcessing, null );
 }
 
