@@ -1514,7 +1514,6 @@ HotRiot.postForm = function( formID, requestPreProcessing, requestSuccessProcess
     bindOptions.dataType = 'json';
     bindOptions.timeout = 15000;  // Timeout request after 15 seconds.
     bindOptions.cache = false;
-alert( "0");
     if( requestPreProcessing != null )
         bindOptions.beforeSubmit = requestPreProcessing;
     if( extra == null )
@@ -1525,20 +1524,17 @@ alert( "0");
         else
             if( extra[0] == 'recordUpdate' )
             {
-alert( "1");
                 bindOptions.extra = extra;
                 bindOptions.beforeSerialize = HotRiot.beforeSerializeRecordUpdateProcessing;
             }
-alert( "2");
     bindOptions.success = requestSuccessProcessing;
     bindOptions.error = requestErrorProcessing;
     bindOptions.type = 'post';
     bindOptions.url = HotRiot.fullyQualifiedHRURL;
-    //bindOptions.xhrFields = new Object();
-    //bindOptions.xhrFields['withCredentials'] = true;
+    bindOptions.crossDomain = true;
+    bindOptions.xhrFields = new Object();
+    bindOptions.xhrFields['withCredentials'] = true;
 
-
-alert( "3");
     $('#' + formID).ajaxSubmit( bindOptions );
     return false;
 }
@@ -1546,7 +1542,6 @@ alert( "3");
 // This is a convenience function for saving a record to your databases which simply forwards processing to the HotRiot.postForm function.
 HotRiot.postRecord = function( formID, requestSuccessProcessing, requestErrorProcessing )
 {
-alert( "this");
     return HotRiot.postForm( formID, null, requestSuccessProcessing, requestErrorProcessing, null );
 }
 
