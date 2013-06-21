@@ -1514,6 +1514,7 @@ HotRiot.postForm = function( formID, requestPreProcessing, requestSuccessProcess
     bindOptions.dataType = 'json';
     bindOptions.timeout = 15000;  // Timeout request after 15 seconds.
     bindOptions.cache = false;
+alert( "0");
     if( requestPreProcessing != null )
         bindOptions.beforeSubmit = requestPreProcessing;
     if( extra == null )
@@ -1524,9 +1525,11 @@ HotRiot.postForm = function( formID, requestPreProcessing, requestSuccessProcess
         else
             if( extra[0] == 'recordUpdate' )
             {
+alert( "1");
                 bindOptions.extra = extra;
                 bindOptions.beforeSerialize = HotRiot.beforeSerializeRecordUpdateProcessing;
             }
+alert( "2");
     bindOptions.success = requestSuccessProcessing;
     bindOptions.error = requestErrorProcessing;
     bindOptions.type = 'post';
@@ -1535,6 +1538,7 @@ HotRiot.postForm = function( formID, requestPreProcessing, requestSuccessProcess
     //bindOptions.xhrFields['withCredentials'] = true;
 
 
+alert( "3");
     $('#' + formID).ajaxSubmit( bindOptions );
     return false;
 }
