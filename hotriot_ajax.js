@@ -1,4 +1,4 @@
-﻿/*!
+﻿﻿/*!
  * jQuery Form Plugin
  * version: 3.35.0-2013.05.23
  * @requires jQuery v1.5 or later
@@ -1531,8 +1531,8 @@ HotRiot.postForm = function( formID, requestPreProcessing, requestSuccessProcess
     bindOptions.error = requestErrorProcessing;
     bindOptions.type = 'post';
     bindOptions.url = HotRiot.fullyQualifiedHRURL;
-    bindOptions.xhrFields = new Object();
-    bindOptions.xhrFields['withCredentials'] = true;
+    //bindOptions.xhrFields = new Object();
+    //bindOptions.xhrFields['withCredentials'] = true;
 
 
     $('#' + formID).ajaxSubmit( bindOptions );
