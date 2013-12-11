@@ -1,6 +1,4 @@
-﻿
-
-/*
+﻿/*
     src: hotriot.com/jsSrc/ajax/hotriot_ajax.js
     author: AS
     date: 9-03-2011
@@ -13,7 +11,7 @@
 
     CREDITS: Many thanks to the developers of jquery.form (http://www.malsup.com/jquery/form/#getting-started). This jquery library for
     processing forms is a gem and relieved us of a ton of work. The hard work of the many contributors to this library is greatly appreciated.
-    Of course, we are grateful to the developers of jQuery (http://jquery.org/). This is an fantastic javascript library which deserves the
+    Of course, we are grateful to the developers of jQuery (http://jquery.org/). This is an fantastic javascript library that deserves the
     success it has seen. Without these two open source libraries, our programming effort for supporting AJAX would have been MUCH more difficult.
  */
 
@@ -21,9 +19,6 @@ var HotRiot = {};
 
 HotRiot.lastHotRiotProcessingErrorCode = 0;
 HotRiot.lastHotRiotProcessingError = '';
-HotRiot.fullyQualifiedHRDAURL = '';
-HotRiot.fullyQualifiedHRURL = '';
-HotRiot.HotRiotProtocol = 'https://';
 
 HotRiot.INVALID_DBN_FN_RN = [ 1, 'The database name, field name or record number is not valid.' ];
 HotRiot.LOCATING_DBN_DBFN = [ 2, 'Could not locate either the database name or the database field names.' ];
@@ -33,6 +28,47 @@ HotRiot.INVALID_ACTION = [ 5, 'Invalid action.' ];
 HotRiot.INVALID_RECORD_NUMBER = [ 6, 'Invalid record number.' ];
 HotRiot.INVALID_QUERY_STRING = [ 7, 'Invalid query string.' ];
 
+HotRiot.defines = {
+    "SUCCESS": 0,
+    "GENERAL_ERROR": -1,
+    "SUBSCRIPTION_RECORD_LIMIT_EXCEPTION": 1,
+    "INVALID_CAPTCHA_EXCEPTION": 2,
+    "INVALID_DATA_EXCEPTION": 3,
+    "NOT_UNIQUE_DATA_EXCEPTION": 4,
+    "ACCESS_DENIED_EXCEPTION": 5,
+    "FILE_SIZE_LIMIT_EXCEPTION": 6,
+    "DB_FULL_EXCEPTION": 7,
+    "BAD_OR_MISSING_ID_EXCEPTION": 8,
+    "NO_RECORDS_FOUND_EXCEPTION": 9,
+    "RECORD_NOT_FOUND_EXCEPTION": 10,
+    "SESSION_TIMEOUT_EXCEPTION": 11,
+    "UNAUTHORIZED_ACCESS_EXCEPTION": 12,
+    "LOGIN_CREDENTIALS_NOT_FOUND": 13,
+    "LOGIN_NOT_FOUND_EXCEPTION": 14,
+    "INVALID_EMAIL_ADDRESS_EXCEPTION": 15,
+    "MULTIPART_LIMIT_EXCEPTION": 16,
+    "IP_ADDRESS_INSERT_RESTRICTION": 17,
+    "INVALID_REQUEST": 18,
+    "ANONYMOUS_USER_EXCEPTION": 19,
+    "INVALID UPDATE CREDENTIALS" : 20
+};
+
+// Internal function that hides the URL parameters and is used to get and set these URLs.
+HotRiot.processURLParams = (function()
+{
+    hotRiotProtocol = 'https://';
+    fullyQualifiedHRDAURL = hotRiotProtocol + 'k222.k222.info/da';
+    fullyQualifiedHRURL = hotRiotProtocol + 'k222.k222.info/process';
+    
+    return{
+        getFullyQualifiedHRDAURL: function() { return fullyQualifiedHRDAURL; },
+        getFullyQualifiedHRURL: function() { return fullyQualifiedHRURL; },
+        
+        setFullyQualifiedHRDAURL: function( nickname ) { fullyQualifiedHRDAURL = hotRiotProtocol + nickname  + '.k222.info/da'; },
+        setFullyQualifiedHRURL: function( nickname ) { fullyQualifiedHRURL = hotRiotProtocol + nickname + '.k222.info/process'; }
+    };
+
+}());
 
 /*
    Function: HotRiot.bindForm
@@ -83,7 +119,7 @@ HotRiot.bindForm = function( formID, requestPreProcessing, requestSuccessProcess
     bindOptions.success = requestSuccessProcessing;
     bindOptions.error = requestErrorProcessing;
     bindOptions.type = 'post';
-    bindOptions.url = HotRiot.fullyQualifiedHRURL;
+    bindOptions.url = HotRiot.processURLParams.getFullyQualifiedHRURL();
 
     $('#' + formID).ajaxForm(bindOptions);
 }
@@ -104,8 +140,8 @@ HotRiot.init = function( nickname )
 {
     HotRiot.clearLastProcessingErrorCode();
 
-    HotRiot.fullyQualifiedHRURL = HotRiot.HotRiotProtocol + nickname + '.k222.info/process';
-    HotRiot.QualifiedHRDAURL = HotRiot.HotRiotProtocol + nickname + '.k222.info/da';
+    HotRiot.processURLParams.setFullyQualifiedHRDAURL( nickname );
+    HotRiot.processURLParams.setFullyQualifiedHRURL( nickname );
 }
 
 /*
@@ -189,7 +225,7 @@ HotRiot.submitRequest = function( requestData, requestSuccessProcessing, request
     HotRiot.clearLastProcessingErrorCode();
 
     $.ajax({
-        url: HotRiot.fullyQualifiedHRURL,
+        url: HotRiot.processURLParams.getFullyQualifiedHRURL(),
         data: requestData,
         success: requestSuccessProcessing,
         error: requestErrorProcessing,
@@ -211,7 +247,7 @@ HotRiot.submitRequest = function( requestData, requestSuccessProcessing, request
 HotRiot.submitRecord = function( databaseName, recordData, requestSuccessProcessing, requestErrorProcessing )
 {
     recordData['hsp-formname'] = databaseName;
-    HotRiot.submitRequest( recordData, requestSuccessProcessing, requestErrorProcessing );
+    return HotRiot.submitRequest( recordData, requestSuccessProcessing, requestErrorProcessing );
 }
 
 HotRiot.submitUpdateRecord = function( databaseName, recordData, editPassword, recordID, requestSuccessProcessing, requestErrorProcessing )
@@ -219,7 +255,7 @@ HotRiot.submitUpdateRecord = function( databaseName, recordData, editPassword, r
     recordData['hsp-formname'] = databaseName;
     recordData['hsp-json'] = editPassword;
     recordData['hsp-recordID'] = recordID;
-    HotRiot.submitRequest( recordData, requestSuccessProcessing, requestErrorProcessing );
+    return HotRiot.submitRequest( recordData, requestSuccessProcessing, requestErrorProcessing );
 }
 
 /* This is a convenience function for performing a search which simply forwards processing to the HotRiot.submitRequest function. This function posts a search request
@@ -229,7 +265,7 @@ HotRiot.submitUpdateRecord = function( databaseName, recordData, editPassword, r
 HotRiot.submitSearch = function( searchName, searchCriterion, requestSuccessProcessing, requestErrorProcessing )
 {
     searchCriterion['hsp-formname'] = searchName;
-    HotRiot.submitRequest( searchCriterion, requestSuccessProcessing, requestErrorProcessing );
+    return HotRiot.submitRequest( searchCriterion, requestSuccessProcessing, requestErrorProcessing );
 }
 
 /* This is a convenience function for performing a login which simply forwards processing to the HotRiot.submitRequest function. This function posts a login request
@@ -239,7 +275,7 @@ HotRiot.submitSearch = function( searchName, searchCriterion, requestSuccessProc
 HotRiot.submitLogin = function( loginName, loginCredentials, requestSuccessProcessing, requestErrorProcessing )
 {
     loginCredentials['hsp-formname'] = loginName;
-    HotRiot.submitRequest( loginCredentials, requestSuccessProcessing, requestErrorProcessing );
+    return HotRiot.submitRequest( loginCredentials, requestSuccessProcessing, requestErrorProcessing );
 }
 
 /* This is a convenience function for posting notification registration which simply forwards processing to the HotRiot.submitRequest function. This function posts a notification
@@ -250,7 +286,7 @@ HotRiot.submitNotification = function( databaseName, recordData, requestSuccessP
 {
     recordData['hsp-formname'] = databaseName;
     recordData['hsp-rtninsert'] = "1";
-    HotRiot.submitRequest( recordData, requestSuccessProcessing, requestErrorProcessing );
+    return HotRiot.submitRequest( recordData, requestSuccessProcessing, requestErrorProcessing );
 }
 
 /* This is a convenience function for performing a lost login lookup which simply forwards processing to the HotRiot.submitRequest function. This function posts a login
@@ -260,7 +296,7 @@ HotRiot.submitNotification = function( databaseName, recordData, requestSuccessP
 HotRiot.submitLostLoginLookup = function( loginName, loginEmailAddress, requestSuccessProcessing, requestErrorProcessing )
 {
     loginEmailAddress['hsp-formname'] = loginName;
-    HotRiot.submitRequest( loginEmailAddress, requestSuccessProcessing, requestErrorProcessing );
+    return HotRiot.submitRequest( loginEmailAddress, requestSuccessProcessing, requestErrorProcessing );
 }
 
 // This function submits a record count request. The 'sll' flag is used for setting a standard record count request (false)
@@ -272,7 +308,7 @@ HotRiot.submitRecordCountActual = function( recordCountObject, requestSuccessPro
     recordCountObject['hsp-action'] = 'recordcount';
     recordCountObject['hsp-sll'] = sll;
     recordCountObject.sinceLastLogin = false;
-    HotRiot.submitRequest( recordCountObject, requestSuccessProcessing, requestErrorProcessing );
+    return HotRiot.submitRequest( recordCountObject, requestSuccessProcessing, requestErrorProcessing );
 }
 
 // This is a wrapper function for the HotRiot.submitRecordCountActual. It submits a general record count request.
@@ -338,7 +374,7 @@ HotRiot.postForm = function( formID, requestPreProcessing, requestSuccessProcess
     bindOptions.success = requestSuccessProcessing;
     bindOptions.error = requestErrorProcessing;
     bindOptions.type = 'post';
-    bindOptions.url = HotRiot.fullyQualifiedHRURL;
+    bindOptions.url = HotRiot.processURLParams.getFullyQualifiedHRURL();
     bindOptions.crossDomain = true;
     bindOptions.xhrFields = new Object();
     bindOptions.xhrFields['withCredentials'] = true;
@@ -2019,6 +2055,11 @@ HotRiot.getRecordID = function( jsonResponse, recordNumber )
     return recordID;
 }
 
+HotRiot.getRegRecord = function( jsonResponse )
+{
+    return HotRiot.getRecord( jsonResponse, 1 );
+}
+
 HotRiot.getInsertData = function( jsonResponse )
 {
     return HotRiot.getRecord( jsonResponse, 1 );
@@ -2228,12 +2269,12 @@ HotRiot.logout = function(logoutOptions, successProcessing, errorProcessing)
     {
         var callbackData = logoutOptions['hsp-callbackdata'];
         if( callbackData != null && callbackData != undefined && callbackData != '' )
-            logoutParameters.concat( '&hsp-callbackdata=', callbackData);
-
+        {
+            logoutParameters += '&hsp-callbackdata=';
+            logoutParameters += callbackData;
+        }
     }
-    
-    HotRiot.postLink( HotRiot.fullyQualifiedHRDAURL + '?hsp-logout=hsp-json' + logoutParameters, successProcessing, errorProcessing );
+
+    HotRiot.postLink( HotRiot.processURLParams.getFullyQualifiedHRDAURL() + '?hsp-logout=hsp-json' + logoutParameters, successProcessing, errorProcessing );
     return true;
 }
-
-
