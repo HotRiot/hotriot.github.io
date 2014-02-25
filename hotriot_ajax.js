@@ -1,4 +1,4 @@
-﻿/*
+﻿﻿/*
     src: hotriot.com/jsSrc/ajax/hotriot_ajax.js
     author: AS
     date: 9-03-2011
@@ -329,31 +329,24 @@ HotRiot.submitRecordCountSLL = function( recordCountObject, requestSuccessProces
    Error Code: No error code is set by this function.
    See Also: <HotRiot.submitSearch, HotRiot.postRecord>
 */
-HotRiot.postForm = function( formID, requestPreProcessing, requestSuccessProcessing, requestErrorProcessing, extra )
+HotRiot.postForm = function( formID, requestSuccessProcessing, requestErrorProcessing, extra )
 {
     HotRiot.clearLastProcessingErrorCode();
     var bindOptions = new Object();
 
-    bindOptions.data = new FormData(document.getElementById(formID));
     bindOptions.dataType = 'json';
     bindOptions.timeout = 15000;  // Timeout request after 15 seconds.
     bindOptions.cache = false;
-    if( requestPreProcessing != null )
-        bindOptions.beforeSubmit = requestPreProcessing;
-    if( extra == null )
-        bindOptions.data.append( "hsp-formname", formID );
-    else
-        if( extra[0] == 'notification' ){
-            bindOptions.data.append( "hsp-formname", formID );
-            bindOptions.data.append( "hsp-rtninsert", "1" );
-        }
+    HotRiot.attachFormName( $( "#" + formID + ":first-child"), formID )
+    if( extra != null )
+    {
+        if( extra[0] == 'notification' )
+            HotRiot.attachNotificationInsert( $( "#" + formID + ":first-child") )
         else
             if( extra[0] == 'recordUpdate' )
-            {
-                bindOptions.data.append( "hsp-json", extra[1] );
-                bindOptions.data.append( "hsp-recordID", extra[2] );
-                bindOptions.data.append( "hsp-formname", formID );
-            }
+                HotRiot.attachrecordUpdate( $( "#" + formID + ":first-child"), extra )
+    }
+    bindOptions.data = new FormData(document.getElementById(formID));
     bindOptions.success = [HotRiot.preSuccessProcessing, requestSuccessProcessing];
     bindOptions.error = requestErrorProcessing;
     bindOptions.type = 'post';
@@ -375,37 +368,37 @@ HotRiot.postForm = function( formID, requestPreProcessing, requestSuccessProcess
 // This is a convenience function for saving a record to your databases which simply forwards processing to the HotRiot.postForm function.
 HotRiot.postRecord = function( formID, requestSuccessProcessing, requestErrorProcessing )
 {
-    return HotRiot.postForm( formID, null, requestSuccessProcessing, requestErrorProcessing, null );
+    return HotRiot.postForm( formID, requestSuccessProcessing, requestErrorProcessing, null );
 }
 
 // This is a convenience function for saving a record to your databases which simply forwards processing to the HotRiot.postForm function.
 HotRiot.postUpdateRecord = function( formID, editPassword, recordID, requestSuccessProcessing, requestErrorProcessing )
 {
-    return HotRiot.postForm( formID, null, requestSuccessProcessing, requestErrorProcessing, new Array('recordUpdate', editPassword, recordID) );
+    return HotRiot.postForm( formID, requestSuccessProcessing, requestErrorProcessing, new Array('recordUpdate', editPassword, recordID) );
 }
 
 // This is a convenience function for performing a search which simply forwards processing to the HotRiot.postForm function.
 HotRiot.postSearch = function( formID, requestSuccessProcessing, requestErrorProcessing )
 {
-    return HotRiot.postForm( formID, null, requestSuccessProcessing, requestErrorProcessing, null );
+    return HotRiot.postForm( formID, requestSuccessProcessing, requestErrorProcessing, null );
 }
 
 // This is a convenience function for performing a login which simply forwards processing to the HotRiot.postForm function.
 HotRiot.postLogin = function( formID, requestSuccessProcessing, requestErrorProcessing )
 {
-    return HotRiot.postForm( formID, null, requestSuccessProcessing, requestErrorProcessing, null );
+    return HotRiot.postForm( formID, requestSuccessProcessing, requestErrorProcessing, null );
 }
 
 // This is a convenience function for posting a notification registration request which simply forwards processing to the HotRiot.postForm function.
 HotRiot.postNotification = function( formID, requestSuccessProcessing, requestErrorProcessing )
 {
-    return HotRiot.postForm( formID, null, requestSuccessProcessing, requestErrorProcessing, new Array('notification') );
+    return HotRiot.postForm( formID, requestSuccessProcessing, requestErrorProcessing, new Array('notification') );
 }
 
 // This is a convenience function for posting a lost login lookup request which simply forwards processing to the HotRiot.postForm function.
 HotRiot.postLostLoginLookup = function( formID, requestSuccessProcessing, requestErrorProcessing )
 {
-    return HotRiot.postForm( formID, null, requestSuccessProcessing, requestErrorProcessing, null );
+    return HotRiot.postForm( formID, requestSuccessProcessing, requestErrorProcessing, null );
 }
 
 
@@ -1800,6 +1793,7 @@ HotRiot.isImage = function( filename )
     if( parts.length > 1 )
     {
         var extension = parts[parts.length-1];
+        extension = extension.toLowerCase();
         if( extension == 'jpg' || extension == 'jpeg' )
             return true;
     }
@@ -2362,3 +2356,44 @@ HotRiot.submitMultiSearch = function( searchNamesArray, searchCriterionArray, su
     HotRiot.multiSearch.submitMultiSearch(searchNamesArray, searchCriterionArray, successProcessing, errorProcessing );
 };
 
+// Some marker.
+HotRiot.attachFormName = function(formObj, formID)
+{
+    var input = document.createElement("input");
+    input.setAttribute("type", "hidden");
+    input.setAttribute("name", "hsp-formname");
+    input.setAttribute("value", formID);
+
+    //Prepend form element to the form.
+    formObj.prepend(input);
+}
+
+HotRiot.attachNotificationInsert = function(formObj)
+{
+    var input = document.createElement("input");
+    input.setAttribute("type", "hidden");
+    input.setAttribute("name", "hsp-rtninsert");
+    input.setAttribute("value", "1");
+
+    //Prepend form element to the form.
+    formObj.prepend(input);
+}
+
+HotRiot.attachRecordUpdate = function(formObj, options)
+{
+    var updatePswd = document.createElement("input");
+    updatePswd.setAttribute("type", "hidden");
+    updatePswd.setAttribute("name", "hsp-json");
+    updatePswd.setAttribute("value", options[1]);
+
+    //Prepend form element to the form.
+    formObj.prepend(updatePswd);
+
+    var recID = document.createElement("input");
+    recID.setAttribute("type", "hidden");
+    recID.setAttribute("name", "hsp-recordID");
+    recID.setAttribute("value", options[2]);
+
+    //Prepend form element to the form.
+    formObj.prepend(recID);
+}
