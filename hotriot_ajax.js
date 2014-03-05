@@ -344,7 +344,7 @@ HotRiot.postForm = function( formID, requestSuccessProcessing, requestErrorProce
             HotRiot.attachNotificationInsert( $( "#" + formID + ":first-child") )
         else
             if( extra[0] == 'recordUpdate' )
-                HotRiot.attachrecordUpdate( $( "#" + formID + ":first-child"), extra )
+                HotRiot.attachRecordUpdate( $( "#" + formID + ":first-child"), extra )
     }
     bindOptions.data = new FormData(document.getElementById(formID));
     bindOptions.success = [HotRiot.preSuccessProcessing, requestSuccessProcessing];
@@ -633,23 +633,25 @@ HotRiot.getDatabaseFieldInfo = function(recordNumber, fieldName, databaseName, j
     if( jsonResponse.recordData[finalRecordNumber].fieldData[dbFieldName] != null )
     {
         recordInfo = new Object();
-
-        recordInfo.value = jsonResponse.recordData[finalRecordNumber].fieldData[dbFieldName].value;
-        recordInfo.dataType = jsonResponse.recordData[finalRecordNumber].fieldData[dbFieldName].dataType;
         recordInfo.dataCount = jsonResponse.recordData[finalRecordNumber].fieldData[dbFieldName].dataCount;
-        recordInfo.sortLink = jsonResponse.recordData[finalRecordNumber].fieldData[dbFieldName].sortLink;
+        recordInfo.dataType = jsonResponse.recordData[finalRecordNumber].fieldData[dbFieldName].dataType;
         recordInfo.fieldName = fieldName;
         recordInfo.databaseName = databaseName;
-        if( recordInfo.dataType == "File")
-        {
-            recordInfo.fileLinkURL = jsonResponse.recordData[finalRecordNumber].fieldData[dbFieldName].fileLinkURL;
-            if( (recordInfo.isPicture = HotRiot.isImage( recordInfo.value[0] )) == true )
-                recordInfo.thumbnailLinkURL = jsonResponse.recordData[finalRecordNumber].fieldData[dbFieldName].thumbnailLinkURL;
+
+        if( recordInfo.dataCount != 0 ){
+            recordInfo.value = jsonResponse.recordData[finalRecordNumber].fieldData[dbFieldName].value;
+            recordInfo.sortLink = jsonResponse.recordData[finalRecordNumber].fieldData[dbFieldName].sortLink;
+            if( recordInfo.dataType == "File")
+            {
+                recordInfo.fileLinkURL = jsonResponse.recordData[finalRecordNumber].fieldData[dbFieldName].fileLinkURL;
+                if( (recordInfo.isPicture = HotRiot.isImage( recordInfo.value[0] )) == true )
+                    recordInfo.thumbnailLinkURL = jsonResponse.recordData[finalRecordNumber].fieldData[dbFieldName].thumbnailLinkURL;
+                else
+                    recordInfo.thumbnailLinkURL = '';
+            }
             else
-                recordInfo.thumbnailLinkURL = '';
+                recordInfo.isPicture = false;
         }
-        else
-            recordInfo.isPicture = false;
     }
     else
         HotRiot.setLastProcessingError(HotRiot.INVALID_DBN_FN_RN);
@@ -1409,7 +1411,7 @@ HotRiot.getTriggerRecordInfo = function(recordNumber, triggerDatabaseName, jsonR
         {
             recordInfo = new Object();
 
-            for( i=0; i<triggerDatabaseFieldNames.length; i++ )
+            for( var i=0; i<triggerDatabaseFieldNames.length; i++ )
                 recordInfo[triggerDatabaseFieldNames[i]] = HotRiot.getDatabaseFieldInfo(recordNumber, triggerDatabaseFieldNames[i], triggerDatabaseName, jsonResponse)
         }
         else
@@ -1672,31 +1674,31 @@ HotRiot.sortSearchResultsEx = function( databaseName, fieldName, jsonResponse, s
         databaseName = HotRiot.getDatabaseName( jsonResponse );
         recordInfo = HotRiot.getDatabaseFieldInfo(1, fieldName, databaseName, jsonResponse);
 
-        if( recordInfo == null )
+        if( recordInfo == null || recordInfo.dataCount == 0 )
         {
             var joinDatabaseNames = HotRiot.getJoinDatabaseNames( jsonResponse );
             if( joinDatabaseNames != '' && joinDatabaseNames.length > 0 )
                 for( var i=0; i<joinDatabaseNames.length; i++ )
                 {
                     recordInfo = HotRiot.getDatabaseFieldInfo(1, fieldName, joinDatabaseNames[i], jsonResponse);
-                    if( recordInfo != null )
+                    if( recordInfo != null && recordInfo.dataCount != 0 )
                         break;
                 }
         }
 
-        if( recordInfo == null )
+        if( recordInfo == null || recordInfo.dataCount == 0 )
         {
             var triggerDatabaseNames = HotRiot.getTriggerDatabaseNames( jsonResponse );
             if( triggerDatabaseNames != '' && triggerDatabaseNames.length > 0 )
                 for( var x=0; x<triggerDatabaseNames.length; x++ )
                 {
                     recordInfo = HotRiot.getDatabaseFieldInfo(1, fieldName, triggerDatabaseNames[x], jsonResponse);
-                    if( recordInfo != null )
+                    if( recordInfo != null && recordInfo.dataCount != 0 )
                         break;
                 }
             }
 
-        if( recordInfo != null )
+        if( recordInfo != null && recordInfo.dataCount != 0 )
         {
             HotRiot.postLink( recordInfo.sortLink, successProcessing, errorProcessing );
             return true;
@@ -1705,7 +1707,7 @@ HotRiot.sortSearchResultsEx = function( databaseName, fieldName, jsonResponse, s
     else
     {
         recordInfo = HotRiot.getDatabaseFieldInfo(1, fieldName, databaseName, jsonResponse);
-        if( recordInfo != null )
+        if( recordInfo != null)
         {
             HotRiot.postLink( recordInfo.sortLink, successProcessing, errorProcessing );
             return true;
@@ -2274,7 +2276,7 @@ HotRiot.deleteJoinRecord = function( recordNumber, databaseName, repost, jsonRes
     HotRiot.clearLastProcessingErrorCode();
     if( HotRiot.isValidRecordNumber(recordNumber, jsonResponse) == true )
     {
-        var deleteRecordLink = HotRiot.getJoinDeleteRecordLink(recordNumber, databaseName, jsonResponse);
+        var deleteRecordLink = HotRiot.getJoinDeleteRecordCommand(recordNumber, databaseName, jsonResponse);
         if( deleteRecordLink != null && deleteRecordLink != '' )
             return HotRiot.deleteRecordDirect( deleteRecordLink, repost, successProcessing, errorProcessing );
         else
@@ -2296,7 +2298,7 @@ HotRiot.deleteRecordDirect = function( deleteRecordLink, repost, successProcessi
     else
     {
         if( repost === false )
-            deleteRecordLink = deleteRecordLink + "&norepost=true"
+            deleteRecordLink = deleteRecordLink + "&norepost=true";
         HotRiot.postLink( deleteRecordLink, successProcessing, errorProcessing );
     }
 
