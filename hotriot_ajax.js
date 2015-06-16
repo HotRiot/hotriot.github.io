@@ -180,7 +180,10 @@ HotRiot.submitRequest = function( requestData, requestSuccessProcessing, request
 
     var bindOptions = new Object();
     bindOptions.url = url;
-    bindOptions.data = requestData;
+    if(Object.prototype.toString.call(requestData).slice(8, -1) == "FormData")
+        bindOptions.data = requestData;
+    else
+        bindOptions.data = $.param( requestData, true );
     bindOptions.success = [HotRiot.preSuccessProcessing, requestSuccessProcessing];
     bindOptions.error = requestErrorProcessing;
     bindOptions.timeout = 15000;
