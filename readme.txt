@@ -7,3 +7,7 @@ Simply include the two script tags below on your host HTML pages in the order th
 <script src="http://hotriot.github.io/hotriot_ajax_min.js"></script>
 
 HotRiot is dependent on jQuery (version 7 or later). In the script tag above, we're loading jQuery from the Google repository. Your free to load it however you think best.
+
+If you prefer, you can download the latest HotRiot source from GitHub using the following link:
+
+https://github.com/HotRiot/hotriot.github.io/archive/master.zip
