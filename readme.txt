@@ -11,3 +11,5 @@ HotRiot is dependent on jQuery (version 7 or later). In the script tag above, we
 If you prefer, you can download the latest HotRiot source from GitHub using the following link:
 
 https://github.com/HotRiot/hotriot.github.io/archive/master.zip
+
+And then load it onto your host HTML pages however you like.
